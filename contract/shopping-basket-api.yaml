@@ -1,0 +1,209 @@
+openapi: 3.0.3
+info:
+  title: Bitside Shopping Basket
+  description: |-
+    This is a sample Swagger
+  version: 0.0.1
+tags:
+  - name: Products
+    description: Everything about products
+  - name: Deals
+    description: Everything about deals
+  - name: Shopping Basket
+    description: Everything about shopping baskets
+paths:
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Lists all products
+      operationId: getProducts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+  /deal-types:
+    get:
+      tags:
+        - Deals
+      summary: Lists all deals
+      operationId: getDealTypes
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DealType'
+  /shopping-baskets:
+    get:
+      tags:
+        - Shopping Basket
+      summary: Lists all shopping baskets
+      operationId: getShoppingBaskets
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ShoppingBasket'
+    post:
+      tags:
+        - Shopping Basket
+      summary: Creates a new shopping basket
+      operationId: createShoppingBasket
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShoppingBasket'
+  /shopping-baskets/{id}/addProduct:
+    patch:
+      tags:
+        - Shopping Basket
+      summary: Adds a product to the shopping basket
+      operationId: addProductToShoppingBasket
+      parameters:
+        - name: id
+          in: path
+          description: Id of the shopping basket
+          required: true
+          style: simple
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductRequest"
+        description: productRequest
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShoppingBasket'
+  /shopping-baskets/{id}/addDeal:
+    patch:
+      tags:
+        - Shopping Basket
+      summary: Adds a product to the shopping basket
+      operationId: addDealToShoppingBasket
+      parameters:
+        - name: id
+          in: path
+          description: Id of the shopping basket
+          required: true
+          style: simple
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DealRequest"
+        description: dealRequest
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShoppingBasket'
+  /shopping-baskets/{id}/totalPrice:
+    get:
+      tags:
+        - Shopping Basket
+      summary: Displays the total Price of the basket
+      operationId: getShoppingBasketTotalPrice
+      parameters:
+        - name: id
+          in: path
+          description: Id of the shopping basket
+          required: true
+          style: simple
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: number
+                format: bigdecimal
+components:
+  schemas:
+
+    ShoppingBasket:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+        deals:
+          type: array
+          items:
+            $ref: '#/components/schemas/Deal'
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Orange Juice
+
+    Deal:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/DealType'
+        productId:
+          type: integer
+          example: 1
+
+    DealType:
+      title: DealType
+      type: string
+      enum:
+        - TEN_PERCENT_OFF
+        - BUY_ONE_GET_ONE_FREE
+      example: "TEN_PERCENT_OFF"
+
+    ProductRequest:
+      type: object
+      properties:
+        productId:
+          type: integer
+          example: 1
+
+    DealRequest:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/DealType'
+        productId:
+          type: integer
+          example: 1

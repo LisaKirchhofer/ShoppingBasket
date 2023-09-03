@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.1.3'
 	id 'io.spring.dependency-management' version '1.1.3'
+	id 'org.openapi.generator' version '7.0.0'
 }
 
 group = 'com.bitside'
@@ -23,11 +24,49 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'io.swagger.codegen.v3:swagger-codegen:3.0.46'
+	implementation 'javax.annotation:javax.annotation-api:1.3.2'
+	implementation 'javax.validation:validation-api:2.0.1.Final'
+	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
 	compileOnly 'org.projectlombok:lombok'
+	compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
 	annotationProcessor 'org.projectlombok:lombok'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir "${buildDir.absolutePath}/generated/src/main/java/com"
+		}
+	}
+}
+
+compileJava
+{
+	dependsOn "openApiGenerate"
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+openApiGenerate {
+	generatorName.set('spring')
+	inputSpec.set("$rootDir/contract/shopping-basket-api.yaml")
+	outputDir.set("$buildDir/generated")
+	invokerPackage.set('com.bitside.shoppingbasket.invoker')
+	apiPackage.set('com.bitside.shoppingbasket.api')
+	modelPackage.set('com.bitside.shoppingbasket.model')
+	configOptions.set([
+		interfaceOnly: 'true',
+		skipDefaultInterface: 'true',
+		openApiNullable: 'false',
+	])
+}
+
+openApiValidate {
+	inputSpec.set("$rootDir/contract/shopping-basket-api.yaml")
 }
