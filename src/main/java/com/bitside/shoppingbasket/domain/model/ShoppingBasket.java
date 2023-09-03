@@ -1,8 +1,11 @@
 package com.bitside.shoppingbasket.domain.model;
 
+import static com.bitside.shoppingbasket.domain.properties.ShoppingBasketProperties.BUY_ONE_GET_ONE_FREE_VALUE;
+import static com.bitside.shoppingbasket.domain.properties.ShoppingBasketProperties.PRECISION_ONE;
+import static com.bitside.shoppingbasket.domain.properties.ShoppingBasketProperties.PRECISION_TWO;
+import static com.bitside.shoppingbasket.domain.properties.ShoppingBasketProperties.TEN_PERCENT_OFF_VALUE;
+
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,15 +50,19 @@ public class ShoppingBasket {
 
     private BigDecimal calculatePricePerProduct(Product product, BigDecimal amount) {
         return getDealType(product).map(it -> switch (it) {
-            case TEN_PERCENT_OFF -> {
-                var regularPrice = calculatePrice(product, amount);
-                yield regularPrice.multiply(BigDecimal.valueOf(0.9), new MathContext(3, RoundingMode.FLOOR));
-            }
-            case BUY_ONE_GET_ONE_FREE -> {
-                var discountPrice = calculatePrice(product, getPromotionAmount(amount));
-                yield isEven(amount) ? discountPrice : discountPrice.add(product.getPrice());
-            }
+            case TEN_PERCENT_OFF -> calculateTenPercentOffDeal(product, amount);
+            case BUY_ONE_GET_ONE_FREE -> calculateBuyOneGetOneFreeDeal(product, amount);
         }).orElseGet(() -> calculatePrice(product, amount));
+    }
+
+    private static BigDecimal calculateBuyOneGetOneFreeDeal(Product product, BigDecimal amount) {
+        var discountPrice = calculatePrice(product, getPromotionAmount(amount));
+        return isEven(amount) ? discountPrice : discountPrice.add(product.getPrice());
+    }
+
+    private static BigDecimal calculateTenPercentOffDeal(Product product, BigDecimal amount) {
+        var regularPrice = calculatePrice(product, amount);
+        return regularPrice.multiply(TEN_PERCENT_OFF_VALUE, PRECISION_TWO);
     }
 
     private Optional<DealType> getDealType(Product product) {
@@ -70,11 +77,11 @@ public class ShoppingBasket {
     }
 
     private static BigDecimal getPromotionAmount(BigDecimal amount) {
-        return amount.divide(BigDecimal.valueOf(2), new MathContext(1, RoundingMode.FLOOR));
+        return amount.divide(BUY_ONE_GET_ONE_FREE_VALUE, PRECISION_ONE);
     }
 
     private static boolean isEven(BigDecimal amount) {
-        return BigDecimal.ZERO.compareTo(amount.remainder(BigDecimal.valueOf(2))) == 0;
+        return BigDecimal.ZERO.compareTo(amount.remainder(BUY_ONE_GET_ONE_FREE_VALUE)) == 0;
     }
 
 }
